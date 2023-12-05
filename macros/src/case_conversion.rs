@@ -49,7 +49,7 @@ impl RenameCase {
 impl<'a> TryFrom<&'a str> for RenameCase {
     type Error = InvalidCase;
 
-    fn try_from(value: &'a str) -> Result<Self, Self::Error> {
+    fn try_from(value: &'a str) -> ::core::result::Result<Self, Self::Error> {
         match value {
             "snake_case" => Ok(Self::Snake),
             "kebab-case" => Ok(Self::Kebab),

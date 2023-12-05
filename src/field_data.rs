@@ -81,7 +81,7 @@ impl<T: TryFromField> TryFromField for FieldData<T> {
     async fn try_from_field(
         field: Field<'_>,
         limit_bytes: Option<usize>,
-    ) -> Result<Self, TypedMultipartError> {
+    ) -> ::core::result::Result<Self, TypedMultipartError> {
         let metadata = FieldMetadata::from(&field);
         let contents = T::try_from_field(field, limit_bytes).await?;
         Ok(Self { metadata, contents })

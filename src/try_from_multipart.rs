@@ -20,5 +20,5 @@ use axum::extract::Multipart;
 /// ```
 #[async_trait]
 pub trait TryFromMultipart: Sized {
-    async fn try_from_multipart(multipart: &mut Multipart) -> Result<Self, TypedMultipartError>;
+    async fn try_from_multipart(multipart: &mut Multipart) -> ::core::result::Result<Self, TypedMultipartError>;
 }

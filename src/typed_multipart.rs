@@ -53,7 +53,7 @@ where
 {
     type Rejection = TypedMultipartError;
 
-    async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: Request, state: &S) -> ::core::result::Result<Self, Self::Rejection> {
         let base = BaseMultipart::<T, Self::Rejection>::from_request(req, state).await?;
         Ok(Self(base.data))
     }
@@ -72,7 +72,7 @@ mod tests {
 
     #[async_trait]
     impl TryFromMultipart for Data {
-        async fn try_from_multipart(_: &mut Multipart) -> Result<Self, TypedMultipartError> {
+        async fn try_from_multipart(_: &mut Multipart) -> ::core::result::Result<Self, TypedMultipartError> {
             Ok(Self(String::from("data")))
         }
     }

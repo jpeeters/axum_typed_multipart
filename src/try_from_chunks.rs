@@ -29,9 +29,9 @@ use uuid::Uuid;
 /// #[async_trait]
 /// impl TryFromChunks for Data {
 ///     async fn try_from_chunks(
-///         chunks: impl Stream<Item = Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
+///         chunks: impl Stream<Item = ::core::result::Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
 ///         metadata: FieldMetadata,
-///     ) -> Result<Self, TypedMultipartError> {
+///     ) -> ::core::result::Result<Self, TypedMultipartError> {
 ///         let string = String::try_from_chunks(chunks, metadata).await?;
 ///         Ok(Data(string))
 ///     }
@@ -43,17 +43,17 @@ pub trait TryFromChunks: Sized {
     ///
     /// The `metadata` parameter contains information about the field.
     async fn try_from_chunks(
-        chunks: impl Stream<Item = Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
+        chunks: impl Stream<Item = ::core::result::Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
         metadata: FieldMetadata,
-    ) -> Result<Self, TypedMultipartError>;
+    ) -> ::core::result::Result<Self, TypedMultipartError>;
 }
 
 #[async_trait]
 impl TryFromChunks for Bytes {
     async fn try_from_chunks(
-        mut chunks: impl Stream<Item = Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
+        mut chunks: impl Stream<Item = ::core::result::Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
         _: FieldMetadata,
-    ) -> Result<Self, TypedMultipartError> {
+    ) -> ::core::result::Result<Self, TypedMultipartError> {
         let mut bytes = BytesMut::new();
 
         while let Some(chunk) = chunks.next().await {
@@ -68,9 +68,9 @@ impl TryFromChunks for Bytes {
 #[async_trait]
 impl TryFromChunks for String {
     async fn try_from_chunks(
-        chunks: impl Stream<Item = Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
+        chunks: impl Stream<Item = ::core::result::Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
         metadata: FieldMetadata,
-    ) -> Result<Self, TypedMultipartError> {
+    ) -> ::core::result::Result<Self, TypedMultipartError> {
         let field_name = get_field_name(&metadata.name);
         let bytes = Bytes::try_from_chunks(chunks, metadata).await?;
 
@@ -89,9 +89,9 @@ macro_rules! gen_try_from_chunks_impl {
         #[async_trait]
         impl TryFromChunks for $type {
             async fn try_from_chunks(
-                chunks: impl Stream<Item = Result<Bytes, TypedMultipartError>> + Send + Sync+ Unpin,
+                chunks: impl Stream<Item = ::core::result::Result<Bytes, TypedMultipartError>> + Send + Sync+ Unpin,
                 metadata: FieldMetadata,
-            ) -> Result<Self, TypedMultipartError> {
+            ) -> ::core::result::Result<Self, TypedMultipartError> {
                 let field_name = get_field_name(&metadata.name);
                 let text = String::try_from_chunks(chunks, metadata).await?;
 
@@ -125,9 +125,9 @@ gen_try_from_chunks_impl!(char);
 #[async_trait]
 impl TryFromChunks for NamedTempFile {
     async fn try_from_chunks(
-        mut chunks: impl Stream<Item = Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
+        mut chunks: impl Stream<Item = ::core::result::Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
         _: FieldMetadata,
-    ) -> Result<Self, TypedMultipartError> {
+    ) -> ::core::result::Result<Self, TypedMultipartError> {
         let temp_file = NamedTempFile::new().map_err(anyhow::Error::new)?;
         let std_file = temp_file.reopen().map_err(anyhow::Error::new)?;
         let mut async_file = AsyncFile::from_std(std_file);
@@ -146,9 +146,9 @@ impl TryFromChunks for NamedTempFile {
 #[async_trait]
 impl TryFromChunks for Uuid {
     async fn try_from_chunks(
-        chunks: impl Stream<Item = Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
+        chunks: impl Stream<Item = ::core::result::Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin,
         metadata: FieldMetadata,
-    ) -> Result<Self, TypedMultipartError> {
+    ) -> ::core::result::Result<Self, TypedMultipartError> {
         let field_name = get_field_name(&metadata.name);
         let bytes = Bytes::try_from_chunks(chunks, metadata).await?;
         Uuid::try_parse_ascii(&bytes).map_err(|err| TypedMultipartError::WrongFieldType {
@@ -175,7 +175,7 @@ mod tests {
 
     fn create_chunks(
         value: impl Into<Bytes>,
-    ) -> impl Stream<Item = Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin {
+    ) -> impl Stream<Item = ::core::result::Result<Bytes, TypedMultipartError>> + Send + Sync + Unpin {
         let mut chunks = Vec::<Result<Bytes, TypedMultipartError>>::new();
 
         for chunk in value.into().chunks(3) {

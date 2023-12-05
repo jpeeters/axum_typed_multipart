@@ -83,7 +83,7 @@ mod tests {
     {
         type Rejection = TypedMultipartError;
 
-        async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+        async fn from_request(req: Request, state: &S) -> ::core::result::Result<Self, Self::Rejection> {
             let multipart = &mut Multipart::from_request(req, state).await?;
             while multipart.next_field().await?.is_some() {}
             unreachable!()

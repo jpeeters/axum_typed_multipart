@@ -23,7 +23,7 @@ pub trait TryFromField: Sized {
     async fn try_from_field(
         field: Field<'_>,
         limit_bytes: Option<usize>,
-    ) -> Result<Self, TypedMultipartError>;
+    ) -> ::core::result::Result<Self, TypedMultipartError>;
 }
 
 #[async_trait]
@@ -34,7 +34,7 @@ where
     async fn try_from_field(
         field: Field<'_>,
         limit_bytes: Option<usize>,
-    ) -> Result<Self, TypedMultipartError> {
+    ) -> ::core::result::Result<Self, TypedMultipartError> {
         let metadata = FieldMetadata::from(&field);
         let mut field_name = metadata.name.clone().unwrap_or(String::new());
         let mut size_bytes = 0;
@@ -77,9 +77,9 @@ mod tests {
     #[async_trait]
     impl TryFromChunks for Data {
         async fn try_from_chunks(
-            chunks: impl Stream<Item = Result<bytes::Bytes, TypedMultipartError>> + Send + Sync + Unpin,
+            chunks: impl Stream<Item = ::core::result::Result<bytes::Bytes, TypedMultipartError>> + Send + Sync + Unpin,
             metadata: FieldMetadata,
-        ) -> Result<Self, TypedMultipartError> {
+        ) -> ::core::result::Result<Self, TypedMultipartError> {
             let data = String::try_from_chunks(chunks, metadata).await?;
             Ok(Self(data))
         }
@@ -105,7 +105,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_try_from_field_valid() {
-        let validator = |res: Result<Data, TypedMultipartError>| {
+        let validator = |res: ::core::result::Result<Data, TypedMultipartError>| {
             assert_eq!(res.unwrap().0, "Hello, world!");
         };
         test_try_from_field("Hello, world!", validator).await;
@@ -113,7 +113,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_try_from_too_large() {
-        let validator = |res: Result<Data, TypedMultipartError>| {
+        let validator = |res: ::core::result::Result<Data, TypedMultipartError>| {
             assert!(matches!(res, Err(TypedMultipartError::FieldTooLarge { .. })));
         };
         test_try_from_field("x".repeat(513), validator).await;

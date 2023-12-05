@@ -167,7 +167,7 @@ pub fn macro_impl(input: TokenStream) -> TokenStream {
     let output = quote! {
         #[axum::async_trait]
         impl axum_typed_multipart::TryFromMultipart for #ident {
-            async fn try_from_multipart(multipart: &mut axum::extract::Multipart) -> Result<Self, axum_typed_multipart::TypedMultipartError> {
+            async fn try_from_multipart(multipart: &mut axum::extract::Multipart) -> ::core::result::Result<Self, axum_typed_multipart::TypedMultipartError> {
                 #(#declarations)*
 
                 while let Some(__field__) = multipart.next_field().await? {
